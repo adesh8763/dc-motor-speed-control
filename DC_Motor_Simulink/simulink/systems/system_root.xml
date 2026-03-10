@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<System>
+  <P Name="Location">[457, 132, 1451, 891]</P>
+  <P Name="Open">on</P>
+  <P Name="ZoomFactor">60</P>
+  <P Name="ReportName">simulink-default.rpt</P>
+  <P Name="SIDHighWatermark">27</P>
+  <Block BlockType="SubSystem" Name="DC_Motor" SID="14">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[500, 130, 620, 230]</P>
+    <P Name="ZOrder">4</P>
+    <P Name="LibrarySourceProduct" Ref="bdmxdata:LibrarySourceProduct_14"/>
+    <P Name="ContentPreviewEnabled">on</P>
+    <System Ref="system_14"/>
+  </Block>
+  <Block BlockType="Sum" Name="Dist_Sum" SID="25">
+    <PortCounts in="2" out="1"/>
+    <P Name="Position">[420, 155, 460, 195]</P>
+    <P Name="ZOrder">6</P>
+  </Block>
+  <Block BlockType="Sum" Name="Err_Sum" SID="2">
+    <PortCounts in="2" out="1"/>
+    <P Name="Position">[170, 155, 210, 195]</P>
+    <P Name="ZOrder">2</P>
+    <P Name="Inputs">+-</P>
+  </Block>
+  <Block BlockType="Step" Name="Load_Torque" SID="24">
+    <P Name="Position">[260, 280, 360, 310]</P>
+    <P Name="ZOrder">5</P>
+    <P Name="Time">2</P>
+    <P Name="After">0.5</P>
+    <P Name="SampleTime">0</P>
+  </Block>
+  <Block BlockType="Mux" Name="Mux" SID="26">
+    <PortCounts in="2" out="1"/>
+    <P Name="Position">[670, 140, 700, 200]</P>
+    <P Name="ZOrder">7</P>
+    <P Name="Inputs">2</P>
+    <P Name="DisplayOption">bar</P>
+  </Block>
+  <Block BlockType="SubSystem" Name="PID_Ctrl" SID="3">
+    <PortCounts in="1" out="1"/>
+    <P Name="Position">[260, 130, 380, 230]</P>
+    <P Name="ZOrder">3</P>
+    <P Name="LibrarySourceProduct" Ref="bdmxdata:LibrarySourceProduct_3"/>
+    <P Name="ContentPreviewEnabled">on</P>
+    <System Ref="system_3"/>
+  </Block>
+  <Block BlockType="Step" Name="Ref_Speed" SID="1">
+    <P Name="Position">[30, 130, 110, 160]</P>
+    <P Name="ZOrder">1</P>
+    <P Name="Time">0</P>
+    <P Name="After">100</P>
+    <P Name="SampleTime">0</P>
+  </Block>
+  <Block BlockType="Scope" Name="Scope" SID="27">
+    <PortCounts in="1"/>
+    <P Name="Position">[730, 155, 770, 195]</P>
+    <P Name="ZOrder">8</P>
+    <P Name="GraphicalSettings">{&quot;GraphicalSettings&quot;:{&quot;LegacySettings&quot;:true,&quot;Style&quot;:{&quot;Style&quot;:{&quot;PlotType&quot;:&quot;Auto&quot;}}}}</P>
+    <P Name="WasSavedAsWebScope">on</P>
+    <P Name="Floating">off</P>
+    <P Name="NumInputPorts">1</P>
+  </Block>
+  <Line>
+    <P Name="ZOrder">9</P>
+    <P Name="Src">1#out:1</P>
+    <P Name="Points">[0, 0]</P>
+    <Branch>
+      <P Name="ZOrder">1</P>
+      <P Name="Points">[75, 0]</P>
+      <P Name="Dst">2#in:1</P>
+    </Branch>
+    <Branch>
+      <P Name="ZOrder">10</P>
+      <P Name="Points">[65, 0; 0, -20; 470, 0; 0, 60]</P>
+      <P Name="Dst">26#in:2</P>
+    </Branch>
+  </Line>
+  <Line>
+    <P Name="ZOrder">7</P>
+    <P Name="Src">14#out:1</P>
+    <P Name="Points">[0, 0]</P>
+    <Branch>
+      <P Name="ZOrder">2</P>
+      <P Name="Points">[0, 55; -435, 0]</P>
+      <P Name="Dst">2#in:2</P>
+    </Branch>
+    <Branch>
+      <P Name="ZOrder">8</P>
+      <P Name="Points">[15, 0; 0, -25]</P>
+      <P Name="Dst">26#in:1</P>
+    </Branch>
+  </Line>
+  <Line>
+    <P Name="ZOrder">3</P>
+    <P Name="Src">2#out:1</P>
+    <P Name="Points">[15, 0; 0, 5]</P>
+    <P Name="Dst">3#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">4</P>
+    <P Name="Src">3#out:1</P>
+    <P Name="Points">[30, 0; 0, -40]</P>
+    <P Name="Dst">25#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">5</P>
+    <P Name="Src">24#out:1</P>
+    <P Name="Points">[75, 0]</P>
+    <P Name="Dst">25#in:2</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">6</P>
+    <P Name="Src">25#out:1</P>
+    <P Name="Points">[10, 0; 0, 5]</P>
+    <P Name="Dst">14#in:1</P>
+  </Line>
+  <Line>
+    <P Name="ZOrder">11</P>
+    <P Name="Src">26#out:1</P>
+    <P Name="Points">[5, 0; 0, 5]</P>
+    <P Name="Dst">27#in:1</P>
+  </Line>
+</System>
