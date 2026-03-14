@@ -1,8 +1,7 @@
 %% DC Motor Speed Control using PID Controller
-% Author: [Your Name]
-% Date: [Current Date]
-% Description: Final corrected version with proper motor physics and voltage limits
-% Note: This version uses only basic MATLAB functions (no toolboxes required)
+% Author: Adesh Prasad
+% Date: 16th March 2026
+
 
 clear all;
 close all;
@@ -13,7 +12,7 @@ fprintf('========================================\n');
 fprintf('DC MOTOR SPEED CONTROL PROJECT\n');
 fprintf('========================================\n\n');
 
-% Motor parameters (typical small DC motor)
+% Motor parameters
 J = 0.01;      % Rotor inertia [kg*m^2]
 b = 0.1;       % Viscous friction coefficient [Nms]
 Kt = 0.01;     % Torque constant [Nm/A]
@@ -21,7 +20,7 @@ Ke = 0.01;     % Back EMF constant [Vs/rad]
 R = 1;         % Armature resistance [Ohm]
 L = 0.5;       % Armature inductance [H]
 
-% Calculate steady-state relationship: V = ω*(R*b/Kt + Ke)
+% steady-state relationship: V = ω*(R*b/Kt + Ke)
 Rb_Kt = R * b / Kt;
 V_to_omega_factor = Rb_Kt + Ke;  % V/ω ratio
 omega_to_V_factor = 1 / V_to_omega_factor;  % ω/V ratio
