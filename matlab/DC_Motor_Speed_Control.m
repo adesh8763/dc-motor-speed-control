@@ -1,29 +1,21 @@
-%% DC Motor Speed Control using PID Controller
-% Author: Adesh Prasad
-% Date: 16th March 2026
-
-
 clear all;
 close all;
 clc;
 
-%% Section 1: DC Motor Parameters
 fprintf('========================================\n');
 fprintf('DC MOTOR SPEED CONTROL PROJECT\n');
 fprintf('========================================\n\n');
 
-% Motor parameters
-J = 0.01;      % Rotor inertia [kg*m^2]
-b = 0.1;       % Viscous friction coefficient [Nms]
-Kt = 0.01;     % Torque constant [Nm/A]
-Ke = 0.01;     % Back EMF constant [Vs/rad]
-R = 1;         % Armature resistance [Ohm]
-L = 0.5;       % Armature inductance [H]
+J = 0.01;
+b = 0.1;
+Kt = 0.01;
+Ke = 0.01;
+R = 1;
+L = 0.5;
 
-% steady-state relationship: V = ω*(R*b/Kt + Ke)
 Rb_Kt = R * b / Kt;
-V_to_omega_factor = Rb_Kt + Ke;  % V/ω ratio
-omega_to_V_factor = 1 / V_to_omega_factor;  % ω/V ratio
+V_to_omega_factor = Rb_Kt + Ke;
+omega_to_V_factor = 1 / V_to_omega_factor;
 
 fprintf('Motor Parameters:\n');
 fprintf('-----------------\n');
@@ -38,12 +30,9 @@ fprintf('-------------------------\n');
 fprintf('V = ω * (R*b/Kt + Ke) = ω * (%.3f)\n', V_to_omega_factor);
 fprintf('ω = V / %.3f\n\n', V_to_omega_factor);
 
-%% Section 2: State-Space Representation
-% Define system matrices for state-space representation
-% States: [current; speed]
 A = [-R/L, -Ke/L; Kt/J, -b/J];
 B = [1/L; 0];
-C = [0, 1];  % Output is speed
+C = [0, 1];
 D = 0;
 
 fprintf('System Matrices:\n');
@@ -56,17 +45,14 @@ fprintf('C matrix (output matrix):\n');
 disp(C);
 fprintf('\n');
 
-%% Section 3: Open Loop Response Analysis and Validation
 fprintf('\n========================================\n');
 fprintf('OPEN LOOP RESPONSE ANALYSIS\n');
 fprintf('========================================\n\n');
 
-% Time vector for simulation
-t = 0:0.01:5;  % 5 seconds simulation
+t = 0:0.01:5;
 dt = t(2) - t(1);
 n_steps = length(t);
 
-% Test with different voltages to validate the model
 test_voltages = [10, 50, 100, 200, 500, 1000];
 fprintf('Model Validation - Steady-State Speed vs Voltage:\n');
 fprintf('------------------------------------------------\n');
@@ -81,7 +67,6 @@ colors = {'b-', 'g-', 'r-', 'c-', 'm-', 'k-'};
 for v_idx = 1:length(test_voltages)
     V_test = test_voltages(v_idx);
     
-    % Simulate open loop response
     x_ol = zeros(2, n_steps);
     y_ol = zeros(1, n_steps);
     u = V_test * ones(1, n_steps);
@@ -92,7 +77,6 @@ for v_idx = 1:length(test_voltages)
         y_ol(k+1) = C * x_ol(:,k+1);
     end
     
-    % Calculate theoretical steady-state speed
     theoretical_speed = V_test / V_to_omega_factor;
     simulated_speed = y_ol(end);
     error_percent = abs(simulated_speed - theoretical_speed) / theoretical_speed * 100;
@@ -100,7 +84,6 @@ for v_idx = 1:length(test_voltages)
     fprintf('V = %4d V   | %13.2f rad/s | %17.2f rad/s | %6.2f%%\n', ...
             V_test, simulated_speed, theoretical_speed, error_percent);
     
-    % Plot response
     plot(t, y_ol, colors{v_idx}, 'LineWidth', 1.5, ...
          'DisplayName', sprintf('V = %d V (final: %.1f rad/s)', V_test, simulated_speed));
 end
@@ -114,13 +97,11 @@ hold off;
 
 fprintf('\nModel validation PASSED - Simulation matches theoretical predictions!\n\n');
 
-%% Section 4: Choose Realistic Operating Point
 fprintf('\n========================================\n');
 fprintf('OPERATING POINT SELECTION\n');
 fprintf('========================================\n\n');
 
-% Choose a realistic reference speed
-reference_speed = 50;  % rad/s
+reference_speed = 50;
 required_voltage = reference_speed * V_to_omega_factor;
 
 fprintf('Selected Operating Point:\n');
@@ -129,19 +110,16 @@ fprintf('Reference Speed: %.1f rad/s\n', reference_speed);
 fprintf('Required Steady-State Voltage: %.1f V\n', required_voltage);
 fprintf('Maximum Voltage Limit (set): 500 V (to allow for control action)\n\n');
 
-%% Section 5: PID Controller Design with Proper Tuning
 fprintf('\n========================================\n');
 fprintf('PID CONTROLLER DESIGN\n');
 fprintf('========================================\n\n');
 
-% PID gains tuned for 50 rad/s reference
-Kp = 20;     % Proportional gain
-Ki = 50;     % Integral gain
-Kd = 1;      % Derivative gain
+Kp = 20;
+Ki = 50;
+Kd = 1;
 
-% Voltage limits
-V_min = -500;  % Allow negative voltage for braking
-V_max = 500;   % Increased limit to allow full control
+V_min = -500;
+V_max = 500;
 
 fprintf('PID Controller Parameters:\n');
 fprintf('-------------------------\n');
@@ -150,12 +128,10 @@ fprintf('Ki = %.4f\n', Ki);
 fprintf('Kd = %.4f\n', Kd);
 fprintf('Voltage Limits: [%d, %d] V\n\n', V_min, V_max);
 
-%% Section 6: Closed Loop Simulation with Proper Voltage Limits
 fprintf('\n========================================\n');
 fprintf('CLOSED LOOP SIMULATION\n');
 fprintf('========================================\n\n');
 
-% Initialize variables
 x_cl = zeros(2, n_steps);
 y_cl = zeros(1, n_steps);
 error_integral = 0;
@@ -163,50 +139,37 @@ prev_error = 0;
 control_signal = zeros(1, n_steps);
 error_array = zeros(1, n_steps);
 
-% Simulation loop
 for k = 1:n_steps-1
-    % Current speed (feedback)
     current_speed = x_cl(2, k);
     
-    % Calculate error (reference - feedback)
     error = reference_speed - current_speed;
     error_array(k) = error;
     
-    % Integral term with anti-windup
     error_integral = error_integral + error * dt;
     
-    % Anti-windup: limit integral term
     integral_limit = 50;
     error_integral = max(-integral_limit, min(integral_limit, error_integral));
     
-    % Derivative term
     if k > 1
         error_derivative = (error - prev_error) / dt;
     else
         error_derivative = 0;
     end
     
-    % PID control law (no feedforward - let PID do its job)
     u_control = Kp * error + Ki * error_integral + Kd * error_derivative;
     
-    % Saturate control signal to voltage limits
     u_control = max(V_min, min(V_max, u_control));
     control_signal(k) = u_control;
     
-    % State derivative
     dxdt = A * x_cl(:,k) + B * u_control;
     
-    % Update state
     x_cl(:,k+1) = x_cl(:,k) + dxdt * dt;
     
-    % Output
     y_cl(k+1) = C * x_cl(:,k+1);
     
-    % Store error for next derivative
     prev_error = error;
 end
 
-% Plot closed loop response
 figure(2);
 subplot(2,1,1);
 plot(t, y_cl, 'b-', 'LineWidth', 2);
@@ -226,20 +189,16 @@ title('Control Signal (Voltage Applied to Motor)');
 xlabel('Time (seconds)');
 ylabel('Voltage (V)');
 
-%% Section 7: Performance Analysis
 fprintf('Performance Analysis:\n');
 fprintf('--------------------\n');
 
-% Calculate steady-state error (last 10% of simulation)
 steady_state_start = round(0.9 * n_steps);
 steady_state_error = mean(abs(reference_speed - y_cl(steady_state_start:end)));
 steady_state_error_percent = (steady_state_error / reference_speed) * 100;
 
-% Calculate overshoot
 peak_speed = max(y_cl);
 overshoot = max(0, (peak_speed - reference_speed) / reference_speed * 100);
 
-% Calculate rise time (10% to 90%)
 y_10 = 0.1 * reference_speed;
 y_90 = 0.9 * reference_speed;
 
@@ -252,11 +211,9 @@ else
     rise_time = NaN;
 end
 
-% Calculate settling time (2% criterion)
-settling_threshold = 0.02 * reference_speed;
 settling_idx = [];
 for i = length(y_cl):-1:1
-    if abs(y_cl(i) - reference_speed) > settling_threshold
+    if abs(y_cl(i) - reference_speed) > 0.02 * reference_speed
         settling_idx = i + 1;
         break;
     end
@@ -276,22 +233,19 @@ fprintf('Overshoot: %.2f %%\n', overshoot);
 fprintf('Rise Time (10%%-90%%): %.3f s\n', rise_time);
 fprintf('Settling Time (2%%): %.3f s\n\n', settling_time);
 
-%% Section 8: Disturbance Rejection Test
 fprintf('\n========================================\n');
 fprintf('DISTURBANCE REJECTION TEST\n');
 fprintf('========================================\n\n');
 
-% Add load torque disturbance
 x_dist = zeros(2, n_steps);
 y_dist = zeros(1, n_steps);
 error_integral_dist = 0;
 prev_error_dist = 0;
 control_signal_dist = zeros(1, n_steps);
 
-% Disturbance parameters
-disturbance_start = 2.0;  % seconds
-disturbance_duration = 1.0;  % seconds
-disturbance_magnitude = -2.0;  % Nm (load torque)
+disturbance_start = 2.0;
+disturbance_duration = 1.0;
+disturbance_magnitude = -2.0;
 
 for k = 1:n_steps-1
     current_speed = x_dist(2, k);
@@ -324,14 +278,12 @@ for k = 1:n_steps-1
     prev_error_dist = error;
 end
 
-% Calculate disturbance rejection metrics
 disturbance_indices = find(t >= disturbance_start & t < disturbance_start + disturbance_duration);
 if ~isempty(disturbance_indices)
     min_speed_during_disturbance = min(y_dist(disturbance_indices));
     speed_drop = reference_speed - min_speed_during_disturbance;
     speed_drop_percent = (speed_drop / reference_speed) * 100;
     
-    % Find recovery time (after disturbance ends)
     recovery_start_idx = find(t >= disturbance_start + disturbance_duration, 1, 'first');
     if ~isempty(recovery_start_idx)
         recovery_idx = find(y_dist(recovery_start_idx:end) >= 0.98 * reference_speed, 1, 'first');
@@ -354,7 +306,6 @@ subplot(2,1,1);
 plot(t, y_dist, 'b-', 'LineWidth', 2);
 hold on;
 plot(t, reference_speed * ones(size(t)), 'r--', 'LineWidth', 1.5);
-% Mark disturbance period
 fill([disturbance_start, disturbance_start+disturbance_duration, ...
       disturbance_start+disturbance_duration, disturbance_start], ...
      [0, 0, reference_speed*1.2, reference_speed*1.2], ...
@@ -379,12 +330,10 @@ fprintf('Load Torque: %.1f Nm from %.1f to %.1f s\n', ...
 fprintf('Maximum Speed Drop: %.2f rad/s (%.1f%%)\n', speed_drop, speed_drop_percent);
 fprintf('Recovery Time (after disturbance ends): %.3f s\n\n', recovery_time);
 
-%% Section 8: Parameter Sweep Analysis
 fprintf('\n========================================\n');
 fprintf('PARAMETER SENSITIVITY ANALYSIS\n');
 fprintf('========================================\n\n');
 
-% Test different Kp values
 Kp_values = [10, 20, 40, 80];
 Ki_fixed = 50;
 Kd_fixed = 1;
@@ -408,7 +357,6 @@ ylabel('Speed (rad/s)');
 legend('Location', 'best');
 hold off;
 
-% Test different Ki values
 Kp_fixed = 20;
 Ki_values = [20, 50, 100, 200];
 Kd_fixed = 1;
@@ -431,12 +379,10 @@ ylabel('Speed (rad/s)');
 legend('Location', 'best');
 hold off;
 
-%% Section 9: Final Assessment
 fprintf('\n========================================\n');
 fprintf('FINAL ASSESSMENT\n');
 fprintf('========================================\n\n');
 
-% Determine controller performance
 if steady_state_error_percent < 5 && overshoot < 20 && ~isnan(settling_time) && settling_time < 3
     performance_grade = 'EXCELLENT';
     recommendation = 'Controller meets all design specifications';
@@ -454,10 +400,6 @@ end
 fprintf('Controller Performance: %s\n', performance_grade);
 fprintf('Recommendation: %s\n\n', recommendation);
 
-
-
-
-%% Section 10: Save Results
 save('dc_motor_final_results.mat', 't', 'y_cl', 'y_dist', 'control_signal', ...
      'Kp', 'Ki', 'Kd', 'reference_speed', 'V_to_omega_factor');
 
@@ -475,7 +417,6 @@ fprintf('\n========================================\n');
 fprintf('PROJECT COMPLETED SUCCESSFULLY\n');
 fprintf('========================================\n');
 
-%% Helper Function
 function y = simulate_pid(A, B, C, Kp, Ki, Kd, reference, V_min, V_max, t)
     dt = t(2) - t(1);
     n_steps = length(t);
